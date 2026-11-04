@@ -52,3 +52,5 @@ Pygments>=2.20.0
 cryptography>=46.0.7
 tavily-python
 wikipedia
+tinyfish
+exa_py
