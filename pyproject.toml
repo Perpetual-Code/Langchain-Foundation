@@ -55,4 +55,7 @@ dependencies = [
     "exa-py>=2.26.0",
     "requests>=2.34.2",
     "arxiv>2.0",
+    "pymed-paperscraper>=1.0.6",
+    "psycopg[binary]>=3.3.9",
+    "langgraph-checkpoint-postgres>=3.2.1",
 ]

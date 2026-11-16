@@ -1,6 +1,5 @@
 import copy
 import os
-import random
 from enum import Enum
 from typing import Any
 
@@ -15,17 +14,17 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 __all__ = [
     "INVOKE_OPTIONS",
+    "ModelName",
     "Models",
     "Trace",
     "get_invoke_options",
-    "invoke_options",
 ]
 
 # ---------------------------------------------------------------------------
 # INFO INVOKE Options for Nvidia models only
 # ---------------------------------------------------------------------------
 INVOKE_OPTIONS: dict[str, Any] = {
-    "seed": random.randint(10, 100),
+    "seed": 50,
     "chat_template_kwargs": {"enable_thinking": True},
 }
 
@@ -57,7 +56,6 @@ def _require_env(name: str) -> str:
 class Trace:
     def __init__(self) -> None:
         os.environ["LANGSMITH_TRACING"] = "true"
-        # os.environ["LANGSMITH_API_KEY"] = cast(str, os.getenv("LANGSMITH_API_KEY"))
         _require_env("LANGSMITH_API_KEY")
         os.environ["LANGSMITH_PROJECT"] = "langchain-tutorial"
 
@@ -69,13 +67,24 @@ class Trace:
 
 class ModelName(str, Enum):
     NEMOTRON_ULTRA_3_550b = "nvidia/nemotron-3-ultra-550b-a55b"
+    """NVIDIA Nemotron-3 Ultra (550B total / 55B active params, 1M context)."""
     NEMOTRON_3_5_BOLT_E4B = "nvidia/nemotron-3.5-bolt-e4b"
     NEMOTRON_3_5_SUPER_VL_120b_a12b = "nvidia/nemotron-3.5-super-vl-120b-a12b"
-    META_MUSE = "meta/muse-glimmer-30b"
     GOOGLE_GEMMA_4_31b = "google/gemma-4-31b-it"
+    """Use stream instead of invoke"""
     MINIMAX_M3_1_FLASH = "minimaxai/minimax-m3.1-flash"
+    """Use stream instead of invoke"""
     MISTRALAI_MISTRAL_LARGE_4 = "mistralai/mistral-large-4-1t-a52b"
-    STEPFUN__STEP_5 = "stepfun-ai/step-5-preview"
+    """Use stream instead of invoke"""
+    STEPFUN_STEP_5 = "stepfun-ai/step-5-preview"
+    """Use stream instead of invoke,only use as last option"""
+    POOLSIDE_LAGUNA = "poolside/laguna-xs-2.1"
+    """Use stream instead of invoke"""
+
+
+class GROQMODELNAMES(str, Enum):
+    QWEN_3_8 = "qwen/qwen3.8-27b"
+    GPT_OSS_120B = "openai/gpt-oss-120b"
 
 
 #   "nvidia/nemotron-3-ultra-550b-a55b",
@@ -99,9 +108,9 @@ class Models:
         # os.environ["NVIDIA_API_KEY"] = cast(str, os.getenv("NVIDIA_API_KEY"))
         pass
 
-    def create_groq_model(self) -> ChatGroq:
+    def create_groq_model(self, model_name) -> ChatGroq:
         _require_env("GROQ_API_KEY")
-        return ChatGroq(model="openai/gpt-oss-120b")
+        return ChatGroq(model=model_name)
 
     def create_nvidia_model(
         self,
@@ -113,8 +122,6 @@ class Models:
         print(f"Creating model {model_name}")
         _require_env("NVIDIA_API_KEY")
         return ChatNVIDIA(
-            # model="nvidia/nemotron-3-ultra-550b-a55b",
-            # model="minimaxai/minimax-m3.1-flash",
             model=model_name,
             temperature=temperature,
             top_p=top_p,
